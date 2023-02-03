@@ -1,0 +1,15 @@
+-I/home/sergiobritto/Dev/c++Dev/fwisv/fwiCPP/fwiCPP
+-I/home/sergiobritto/Matplotlibcpp
+-I/usr/include/python3.8
+-I/home/sergiobritto/.local/lib/python3.8
+-I/usr/include/c++/9
+-I/usr/include/x86_64-linux-gnu/c++/9
+-I/usr/include/c++/9/backward
+-I/usr/lib/gcc/x86_64-linux-gnu/9/include
+-I/usr/local/include
+-I/usr/include/x86_64-linux-gnu
+-I/usr/include
+-DNDEBUG
+-std=c++17
+-target
+x86_64-linux-gnu
