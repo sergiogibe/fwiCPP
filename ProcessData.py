@@ -18,7 +18,6 @@ class ProblemData:
                       ]   
     
     def fill(self, nn, nel, ned, length, depth, I, freq, dt, nsteps, nrec, nshots, nlvls):
-    
         #General config attributes
         self.nn = int(nn)
         self.nel = int(nel)
@@ -46,8 +45,6 @@ class ProblemData:
         self.sources_y = np.zeros((self.nshots))
         
     def update(self):
-        
-        #Solution in a 3d matrix
         self.solution = np.zeros((self.nn,self.nsteps,self.nshots))
         index = 0
         for s in range(self.nshots):
@@ -56,7 +53,6 @@ class ProblemData:
                     self.solution[n,t,s] = self.raw_solution[index]
                     index += 1
                     
-        #Connectivity in a 2d matrix
         self.connectivity = np.zeros((self.ne,4),dtype=int)
         index = 0
         for e in range(self.ne):
@@ -81,6 +77,7 @@ class ProblemData:
         print(f"Number of receivers: {self.nrec}")
         print(f"Number of shots: {self.nshots}")
         print(f"Number of control function levels: {self.nlvls}")
+        print(f"Levels: {[self.levels[i] for i in range(self.nlvls)]}")
         
     def save(self):
         self.plt_pulse()
@@ -88,7 +85,6 @@ class ProblemData:
         self.render_propagation()
         
     def render_propagation(self, shot=0, sample_size=10, save=False):
-        
         if save is False:
             show = True
 
@@ -123,14 +119,13 @@ class ProblemData:
         
         
     def plt_contour(self, fig_number=0, name="contour", fill=True, pltSR=True, show=False):
-        
-        plt.figure(fig_number, dpi=300)
-        
         vp = np.zeros((self.nel+1, self.ned+1))
         for j in range(self.ned+1):
             for i in range(self.nel+1):
                 vp[i,j] = self.control[i+j*(self.nel+1)]
-
+                
+        plt.figure(fig_number, dpi=300)
+        
         if fill:
             func = plt.contourf
         else:
@@ -194,6 +189,9 @@ class ProblemData:
         Row 8 - Mesh connectivity
         Row 9 - Solution field
         
+        *Row 10 - Validation script only (Stiffness)
+        *Row 11 - Validation script only (Mass)
+        
         '''
         row_counter = 0
         with open(file_path, 'r') as file:
@@ -231,20 +229,21 @@ class ProblemData:
                 else:
                     pass
                 row_counter += 1
+                
+        model.update()
 
 
 def main():
-    print("\nPOST-PROCESSING DATA    ...   \n")
+    print("\nPOST-PROCESSING DATA\n    ...   \n")
     problem = ProblemData()
     csv.field_size_limit(sys.maxsize)
     ProblemData.parse_csv_file(file_path="./dataraw/data.csv", model=problem)
-    problem.update()
     problem.log()
     problem.save()
     
     
     
-    print("\nDone. ")
+    print("\n    ...   \n\nDone. ")
 
 if __name__ == "__main__":
     main()

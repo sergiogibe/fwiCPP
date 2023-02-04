@@ -20,7 +20,7 @@ namespace setup {
 
     const double PULSE_INTENSITY {1.00};
     const double PULSE_CENTRAL_FREQUENCY {2.0};
-    const double OBSERVATION_PERIOD {2.1};
+    const double OBSERVATION_PERIOD {2.6};
     const double TIME_STEP {0.002};
 }
 

@@ -1,5 +1,6 @@
-/Debug
-/Release
+Debug/
+Release/
+validationData/
 compile_flags.txt
 fwiCPP.mk
 fwiCPP.project
