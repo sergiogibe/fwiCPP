@@ -1,39 +1,48 @@
 #include "MaterialModel.h"
 #include <iostream>
+#include <armadillo>
 
 MaterialModel::MaterialModel(unsigned int nnodes, double init_value) : nn(nnodes) {
-    control_func = new double[nn];
+    control_func = new arma::colvec(nn);
     for (unsigned int i {0}; i < nn; i++) {
-        control_func[i] = init_value;
+        (*control_func)(i) = init_value;
     }
+    
+    lvls = nullptr;
+    velocities = nullptr;
 }
 
 MaterialModel::~MaterialModel() {
-    delete [] control_func;
-    delete [] lvls;
-    delete [] velocities;
+    delete control_func;
+    delete lvls;
+    delete velocities;
 }
 
-void MaterialModel::set_levels(unsigned int n_levels, double* levels) {
+void MaterialModel::set(unsigned int n_levels, double* levels, double* velocities_arr) {
     n_lvls = n_levels;
-    lvls = new double[n_lvls];
-    lvls = levels;
+    
+    delete lvls;
+    lvls = new arma::colvec(n_lvls);
+    for (arma::uword i {0}; i < n_lvls; i++) {
+        (*lvls)(i) = levels[i];
+    }
+    
+    delete velocities;
+    velocities = new arma::colvec(n_lvls);
+    for (arma::uword i {0}; i < n_lvls; i++) {
+        (*velocities)(i) = velocities_arr[i];
+    }
 }
 
-void MaterialModel::set_velocities(double* velocities_arr) {
-    velocities = new double[n_lvls];
-    velocities = velocities_arr;
-}
-
-double* MaterialModel::get_levels() {
+arma::colvec* MaterialModel::get_levels() {
     return lvls;
 }
 
-double* MaterialModel::get_velocities() {
+arma::colvec* MaterialModel::get_velocities() {
     return velocities;
 }
 
-double* MaterialModel::get_control_function() {
+arma::colvec* MaterialModel::get_control_function() {
     return control_func;
 }
 
@@ -48,8 +57,8 @@ unsigned int MaterialModel::get_nvels() {
 void MaterialModel::log_control_func() {
     if (nn < 150) {
         std::cout << "------------------" << std::endl;
-        for (unsigned int i {0}; i < nn; i++) {
-            std::cout << control_func[i] << std::endl;
+        for (arma::uword i {0}; i < nn; i++) {
+            std::cout << (*control_func)(i) << std::endl;
         }
         std::cout << "------------------" << std::endl;
     }
@@ -57,16 +66,16 @@ void MaterialModel::log_control_func() {
 
 void MaterialModel::log_levels() {
     std::cout << "--------------------------------------------------------------------" << std::endl;
-    for (unsigned int i {0}; i < n_lvls; i++) {
-        std::cout << "    Level " << i+1 << ": " << lvls[i];
+    for (arma::uword i {0}; i < n_lvls; i++) {
+        std::cout << "    Level " << i+1 << ": " << (*lvls)(i);
     }
     std::cout << "\n--------------------------------------------------------------------" << std::endl;
 }
 
 void MaterialModel::log_velocities() {
     std::cout << "--------------------------------------------------------------------" << std::endl;
-    for (unsigned int i {0}; i < n_lvls; i++) {
-        std::cout << "    Vel " << i+1 << ": " << velocities[i];
+    for (arma::uword i {0}; i < n_lvls; i++) {
+        std::cout << "    Vel " << i+1 << ": " << (*velocities)(i);
     }
     std::cout << "\n--------------------------------------------------------------------" << std::endl;
 }

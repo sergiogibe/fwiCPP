@@ -1,28 +1,28 @@
 #ifndef _MATMOD_H_
 #define _MATMOD_H_
 #include "Mesh.h"
+#include <armadillo>
 
 class MaterialModel {
 //Attributes
 private:
-    unsigned int nn; //init
+    unsigned int nn; //init list
     
     unsigned int n_lvls;
-    double* lvls;
-    double* velocities;
-    double* control_func;
+    arma::colvec* lvls;
+    arma::colvec* velocities;
+    arma::colvec* control_func;
 
 //Methods
 public:
     MaterialModel(unsigned int nnodes, double init_value);
     ~MaterialModel();
     
-    void set_levels(unsigned int n_levels, double* levels);
-    void set_velocities(double* velocities_arr);
+    void set(unsigned int n_levels, double* levels, double* velocities_arr);
     
-    double* get_levels();
-    double* get_velocities();
-    double* get_control_function();
+    arma::colvec* get_levels();
+    arma::colvec* get_velocities();
+    arma::colvec* get_control_function();
     unsigned int get_nlvls();
     unsigned int get_nvels();
     

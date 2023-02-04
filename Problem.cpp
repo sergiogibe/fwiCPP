@@ -36,21 +36,23 @@ Problem::Problem(unsigned int nel,
     //Generating control function
     control = new MaterialModel(problem_mesh->get_number_of_nodes(), control_init_value);
     
-    
-    
+    //Initializing other members as nullptrs
+    ricker_pulse = nullptr;
+    global_stiffness_consistent = nullptr;
+    global_mass_consistent = nullptr;
+    global_mass = nullptr;
+    solution = nullptr;
 }
 
 Problem::~Problem() {
-    delete [] problem_mesh;
-    delete [] control;
-    delete [] ricker_pulse;
-    delete [] global_stiffness_consistent;
-    delete [] global_mass_consistent;
-    delete [] global_mass;
-    delete [] solution;
+    delete problem_mesh;
+    delete control;
+    delete ricker_pulse;
+    delete global_stiffness_consistent;
+    delete global_mass_consistent;
+    delete global_mass;
+    delete solution;
 }
-
-
 
 
 /*   ===============  Solutions  ===============  */
@@ -381,17 +383,17 @@ double Problem::find_element_slowness(unsigned int element) {
     //Finding the control value at each node for element "element"
     arma::mat aux_element_control;
     aux_element_control.zeros(4);
-    aux_element_control(0) = control->get_control_function()[problem_mesh->get_connectivity()[element-1].global_node1-1];
-    aux_element_control(1) = control->get_control_function()[problem_mesh->get_connectivity()[element-1].global_node2-1];
-    aux_element_control(2) = control->get_control_function()[problem_mesh->get_connectivity()[element-1].global_node3-1];
-    aux_element_control(3) = control->get_control_function()[problem_mesh->get_connectivity()[element-1].global_node4-1];
+    aux_element_control(0) = (*control->get_control_function())(problem_mesh->get_connectivity()[element-1].global_node1-1);
+    aux_element_control(1) = (*control->get_control_function())(problem_mesh->get_connectivity()[element-1].global_node2-1);
+    aux_element_control(2) = (*control->get_control_function())(problem_mesh->get_connectivity()[element-1].global_node3-1);
+    aux_element_control(3) = (*control->get_control_function())(problem_mesh->get_connectivity()[element-1].global_node4-1);
     
     //Finding the slowness for each velocity
     unsigned int n_vels = control->get_nvels();
     arma::mat slowness_values;
     slowness_values.zeros(n_vels);
     for (unsigned int i = 0; i < n_vels; i++) {
-        slowness_values(i) = 1/(pow(control->get_velocities()[i],2));
+        slowness_values(i) = 1/(pow((*control->get_velocities())(i),2));
     }
     
     //Using the mean to calculate the control value "cv" for this element
@@ -408,19 +410,19 @@ double Problem::find_element_slowness(unsigned int element) {
     
     //First we need to identify who l(i+1) and l(i) are. Upper and lower bounds, respectively.
     //
-    double* levels = control->get_levels();
+    arma::colvec levels = *control->get_levels();
     unsigned int n_lvls = control->get_nlvls();
     double lower_b {0.0};
     unsigned int lower_b_index {0};
-    double upper_b {levels[1]};
+    double upper_b {levels(1)};
     for (unsigned int i = 0; i < n_lvls-1; i++) {
-        if (cv-levels[i+1] < 0) {
-            upper_b = levels[i+1];
-            lower_b = levels[i];
+        if (cv-levels(i+1) < 0) {
+            upper_b = levels(i+1);
+            lower_b = levels(i);
             lower_b_index = i;
             break;
         }
-        else if (cv >= levels[n_lvls-1]) {
+        else if (cv >= levels(n_lvls-1)) {
             return slowness_values(n_vels-1);
         }
     }
@@ -434,12 +436,8 @@ double Problem::find_element_slowness(unsigned int element) {
 
 /*   ===============  Control methods  ===============  */
 
-void Problem::set_levels(unsigned int n_levels, double* levels) {
-    control->set_levels(n_levels, levels);
-}
-
-void Problem::set_velocities(double* velocities_arr) {
-    control->set_velocities(velocities_arr);
+void Problem::set_control(unsigned int n_levels, double* levels, double* velocities_arr) {
+    control->set(n_levels, levels, velocities_arr);
 }
 
 void Problem::print_levels() {
@@ -529,7 +527,7 @@ void Problem::write_output() {
     //Useful shortcuts
     unsigned int nn = problem_mesh->get_number_of_nodes();
     
-    //Write the configuration as the first line 
+    //Write the configuration as the first line (ROW 0)
     file 
     << nn                     << ","
     << number_elements_length << "," 
@@ -544,7 +542,7 @@ void Problem::write_output() {
     << sources.size()         << ","
     << control->get_nlvls()   << "\n"; 
     
-    //Write the Ricker pulse to the file
+    //Write the Ricker pulse to the file (ROW 1)
     for (unsigned int i = 0; i < n_steps; ++i) {
         file << (*ricker_pulse)(i);
         if (i < n_steps - 1) {
@@ -553,25 +551,25 @@ void Problem::write_output() {
     }
     file << "\n";
     
-    //Write the control function to the file
+    //Write the control function to the file (ROW 2)
     for (unsigned int i = 0; i < nn; ++i) {
-        file << control->get_control_function()[i];
+        file << (*control->get_control_function())(i);
         if (i < nn - 1) {
             file << ",";
         }
     }
     file << "\n";
     
-    //Write control function levels to the file
+    //Write control function levels to the file (ROW 3)
     for (unsigned int i = 0; i < control->get_nlvls(); ++i) {
-        file << control->get_levels()[i];
+        file << (*control->get_levels())(i);
         if (i < control->get_nlvls() - 1) {
             file << ",";
         }
     }
     file << "\n";
     
-    //Write the receivers x coordinates to the file
+    //Write the receivers x coordinates to the file (ROW 4)
     for (unsigned int i = 0; i < receivers.size(); ++i) {
         file << receivers[i].get_xcoord();
         if (i < receivers.size() - 1) {
@@ -580,7 +578,7 @@ void Problem::write_output() {
     }
     file << "\n";
     
-    //Write the receivers y coordinates to the file
+    //Write the receivers y coordinates to the file (ROW 5)
     for (unsigned int i = 0; i < receivers.size(); ++i) {
         file << receivers[i].get_ycoord();
         if (i < receivers.size() - 1) {
@@ -589,7 +587,7 @@ void Problem::write_output() {
     }
     file << "\n";
     
-    //Write the sources x coordinates to the file
+    //Write the sources x coordinates to the file (ROW 6)
     for (unsigned int i = 0; i < sources.size(); ++i) {
         file << sources[i].get_xcoord();
         if (i < sources.size() - 1) {
@@ -598,7 +596,7 @@ void Problem::write_output() {
     }
     file << "\n";
     
-    //Write the sources y coordinates to the file
+    //Write the sources y coordinates to the file (ROW 7)
     for (unsigned int i = 0; i < sources.size(); ++i) {
         file << sources[i].get_ycoord();
         if (i < sources.size() - 1) {
@@ -607,17 +605,50 @@ void Problem::write_output() {
     }
     file << "\n";
     
-    //Write the solution to the file
-//    for (unsigned int s = 0; s < sources.size(); ++s) {
-//        for (unsigned int t = 0; t < n_steps; ++t) {
-//            for (unsigned int n = 0; n < nn; ++n) {
-//                file << (*solution)(n,t,s);
-//                if (s < sources.size() - 1) {
-//                    file << ",";
-//                }
-//            }
-//        }
-//    }
+    //Write the connectivity to the file (ROW 8)
+    unsigned int i_max {0};
+    for (unsigned int e = 0; e < problem_mesh->get_number_of_elements(); ++e) {
+       file << problem_mesh->get_connectivity()[e].global_node1 << ",";
+        file << problem_mesh->get_connectivity()[e].global_node2 << ",";
+        file << problem_mesh->get_connectivity()[e].global_node3 << ",";
+        file << problem_mesh->get_connectivity()[e].global_node4;
+        i_max++;
+        if (i_max != problem_mesh->get_number_of_elements()*4) {
+            file << ",";
+        }
+    }
+    file << "\n";
+    
+    //Write the solution to the file (ROW 9)
+    int decimal_places = 10;
+    float factor = pow(10, decimal_places);
+    i_max = 0;
+    for (unsigned int s = 0; s < sources.size(); ++s) {
+        for (unsigned int t = 0; t < n_steps; ++t) {
+            for (unsigned int n = 0; n < nn; ++n) {
+                file << round((*solution)(n,t,s) * factor) / factor;
+                i_max++;
+                if (i_max != sources.size()*n_steps*nn) {
+                    file << ",";
+                }
+            }
+        }
+    }
+    file << "\n";
+    
+    //Write the stiffness matrix (constant matrix) to the file (ROW 10)
+    i_max = 0;
+    for (unsigned int s = 0; s < sources.size(); ++s) {
+        for (unsigned int t = 0; t < n_steps; ++t) {
+            for (unsigned int n = 0; n < nn; ++n) {
+                file << round((*solution)(n,t,s) * factor) / factor;
+                i_max++;
+                if (i_max != sources.size()*n_steps*nn) {
+                    file << ",";
+                }
+            }
+        }
+    }
     file << "\n";
 
     //Close the file

@@ -20,8 +20,8 @@ SquareLinearMesh::SquareLinearMesh(unsigned int number_elements_length,
 }
 
 SquareLinearMesh::~SquareLinearMesh(){
-        delete coordinates;
-        delete connectivity;
+        delete [] coordinates;
+        delete [] connectivity;
     }
 
 void SquareLinearMesh::gen_coordinates() {

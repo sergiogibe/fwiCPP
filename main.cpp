@@ -8,8 +8,8 @@
 
 
 namespace setup {
-    const unsigned int NEL {10}; 
-    const unsigned int NED {10};
+    const unsigned int NEL {50}; 
+    const unsigned int NED {50};
     const double DOMAIN_LENGTH {2}; 
     const double DOMAIN_DEPTH {2};
 
@@ -20,8 +20,8 @@ namespace setup {
 
     const double PULSE_INTENSITY {1.00};
     const double PULSE_CENTRAL_FREQUENCY {2.0};
-    const double OBSERVATION_PERIOD {2.6};
-    const double TIME_STEP {0.02};
+    const double OBSERVATION_PERIOD {2.1};
+    const double TIME_STEP {0.002};
 }
 
 
@@ -42,19 +42,15 @@ int main(){
                           
     real_problem.add_device("receiver",1.0,1.0,0);
     real_problem.add_device("source",  1.5,1.5,0);
-    real_problem.add_device("source",  1.0,1.5,0);
-    real_problem.add_device("source",  1.5,1.0,0);
-    real_problem.set_levels(setup::N_LEVELS, setup::LEVELS);
-    real_problem.set_velocities(setup::VELS);
+//    real_problem.add_device("source",  1.0,1.5,0);
+//    real_problem.add_device("source",  1.5,1.0,0);
+    real_problem.set_control(setup::N_LEVELS, setup::LEVELS, setup::VELS);
     real_problem.build();
     real_problem.solve("forward_only");
     real_problem.write_output();
     
     
-    real_problem.print_receivers();
-    
 
- 
 
 
     std::cout << " " << std::endl;

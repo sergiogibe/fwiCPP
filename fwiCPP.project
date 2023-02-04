@@ -3,7 +3,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="process.py"/>
+    <File Name="ProcessData.py"/>
+    <File Name="ValidationScript.py"/>
     <File Name="Problem.h"/>
     <File Name="Problem.cpp"/>
     <File Name="MaterialModel.h"/>
