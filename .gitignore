@@ -1,6 +1,11 @@
+.idea/
 Debug/
 Release/
+Output/
+images/
 validationData/
+build/
+cmake-build-*/
 compile_flags.txt
 fwiCPP.mk
 fwiCPP.project
