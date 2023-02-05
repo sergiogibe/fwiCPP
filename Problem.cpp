@@ -7,6 +7,7 @@
 #include <cmath>
 #include <string>
 #include <armadillo>
+#include <filesystem>
 #include "omp.h"
 
 
@@ -522,6 +523,7 @@ void Problem::print_sources() {
 void Problem::write_output() {
     
     std::cout << "Writing output to './Output/data.csv'    ...   " << std::flush;
+    std::filesystem::create_directory("./Output/");
     //Open the CSV file for writing
     std::ofstream file("./Output/data.csv");
     if (!file.is_open()) {
