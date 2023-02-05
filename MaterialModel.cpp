@@ -1,6 +1,7 @@
 #include "MaterialModel.h"
 #include <iostream>
 #include <armadillo>
+#include <vector>
 
 MaterialModel::MaterialModel(unsigned int nnodes, double init_value) : nn(nnodes) {
     control_func = new arma::colvec(nn);
@@ -18,7 +19,7 @@ MaterialModel::~MaterialModel() {
     delete velocities;
 }
 
-void MaterialModel::set(unsigned int n_levels, double* levels, double* velocities_arr) {
+void MaterialModel::set(unsigned int n_levels, std::vector<double> levels, std::vector<double> velocities_arr) {
     n_lvls = n_levels;
     
     delete lvls;

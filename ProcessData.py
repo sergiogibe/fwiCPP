@@ -237,7 +237,7 @@ def main():
     print("\nPOST-PROCESSING DATA\n    ...   \n")
     problem = ProblemData()
     csv.field_size_limit(sys.maxsize)
-    ProblemData.parse_csv_file(file_path="./dataraw/data.csv", model=problem)
+    ProblemData.parse_csv_file(file_path="./Output/data.csv", model=problem)
     problem.log()
     problem.save()
     

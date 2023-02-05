@@ -2,6 +2,7 @@
 #define _MATMOD_H_
 #include "Mesh.h"
 #include <armadillo>
+#include <vector>
 
 class MaterialModel {
 //Attributes
@@ -18,7 +19,7 @@ public:
     MaterialModel(unsigned int nnodes, double init_value);
     ~MaterialModel();
     
-    void set(unsigned int n_levels, double* levels, double* velocities_arr);
+    void set(unsigned int n_levels, std::vector<double> levels, std::vector<double> velocities_arr);
     
     arma::colvec* get_levels();
     arma::colvec* get_velocities();

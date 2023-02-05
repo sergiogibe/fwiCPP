@@ -75,7 +75,7 @@ public:
     //Getters
     
     //Setters
-    void set_control(unsigned int n_levels, double* levels, double* velocities_arr);
+    void set_control(unsigned int n_levels, std::vector<double> levels, std::vector<double> velocities_arr);
     void add_device(std::string mode, double posx, double posy, unsigned int id);
     
     

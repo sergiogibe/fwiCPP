@@ -1,0 +1,23 @@
+{
+    "mesh": {
+        "nel": 50,
+        "ned": 50
+    },
+    "domain": {
+        "length": 2,
+        "depth":  2
+    },
+    "levelset": {
+        "init":    0.5,
+        "n_lvls":  4,
+        "levels": [0.0, 0.5, 1.0, 1.5],
+        "vels":   [0.5, 1.0, 3.5, 4.5]
+    },
+    "time": {
+        "pulse_int":  1.0,
+        "pulse_freq": 2.0,
+        "period":     2.6,
+        "dt":         0.002
+        
+    }
+}

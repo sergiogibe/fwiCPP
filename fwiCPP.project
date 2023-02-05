@@ -3,6 +3,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="settings.json"/>
     <File Name="ProcessData.py"/>
     <File Name="ValidationScript.py"/>
     <File Name="Problem.h"/>
@@ -70,9 +71,9 @@
     <Configuration Name="Release" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-g;-O0;-fopenmp;-std=c++17;-Wall;" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="."/>
-        <IncludePath Value="/home/sergiobritto/Matplotlibcpp"/>
         <IncludePath Value="/usr/include/python3.8"/>
         <IncludePath Value="/home/sergiobritto/.local/lib/python3.8/"/>
+        <IncludePath Value="/home/sergiobritto/includescpp"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="-fopenmp;-larmadillo;-lopenblas;-llapack;" Required="yes"/>

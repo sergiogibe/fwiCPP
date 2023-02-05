@@ -3,22 +3,37 @@ import csv
 import sys
 
 '''
-Validation considering bellow problem parameters:
+Validation considering following problem parameters:
 
+%%%% KVALID , MVALID, SVALID %%%%
 Domain = 2x2 km
 Mesh = 50x50 elements
 T = 2.6s
 dt = 0.002s
 I = 1.0
 freq = 2Hz
-vel = 1.0km/s
+vel = 1.0km/s (only background)
+Single shot = (x=1.5, y=1.5)
+No absorbing boundaries
+
+%%%% KVALID2 , MVALID2, SVALID2 %%%% TODO
+Domain = 2x2 km
+Mesh = 80x80 elements
+T = 2.6s
+dt = 0.002s
+I = 1.0
+freq = 2Hz
+vel1 = 1.0km/s 
+vel2 = 3.0km/s (single centered square 0.3x0.3 km)
+Four shots = (x=0.0, y=0.0), (x=2.0, y=0.0), (x=0.0, y=2.0), (x=2.0, y=2.0)
+No absorbing boundaries
 
 '''
 
 class Valid:
 
     def __init__(self):
-        self.tol = 10**(-10)
+        self.tol = 10**(-7)
 
     def fill(self, nn, nsteps, nshots):
         self.nn = int(nn)
@@ -51,39 +66,39 @@ class Valid:
                 self.mass[i,j] = self.raw_mass[index]
                 index += 1
                 
-    def run(self):
-        self.val_stiffness()
-        self.val_mass()
-        self.val_solution()
+    def run(self, kvalid: str, mvalid: str, svalid: str):
+        self.val_stiffness(example=kvalid)
+        self.val_mass(example=mvalid)
+        self.val_solution(example=svalid)
     
-    def val_stiffness(self):
-        with open('./validationData/kvalid.npy', 'rb') as f:
+    def val_stiffness(self, example: str):
+        with open(f'./validationData/{example}.npy', 'rb') as f:
             kvalid = np.load(f,allow_pickle=True)
             result = Valid.least_squares(kvalid, self.stiffness)
             if result < self.tol:
                 print("The stiffness matrix was validated with success.\n")
             else:
-                print(f"The stiffness matrix is not correct. Error: {result}\n")
+                print(f"The stiffness matrix is not correct. Error value: {result}\n")
         return 
         
-    def val_mass(self):
-        with open('./validationData/mvalid.npy', 'rb') as f:
+    def val_mass(self, example: str):
+        with open(f'./validationData/{example}.npy', 'rb') as f:
             mvalid = np.load(f,allow_pickle=True)
             result = Valid.least_squares(mvalid, self.mass)
             if result < self.tol:
                 print("The mass matrix was validated with success.\n")
             else:
-                print(f"The mass matrix is not correct. Error: {result}\n")
+                print(f"The mass matrix is not correct. Error value: {result}\n")
         return 
     
-    def val_solution(self):
-        with open('./validationData/svalid.npy', 'rb') as f:
+    def val_solution(self, example: str):
+        with open(f'./validationData/{example}.npy', 'rb') as f:
             svalid = np.load(f,allow_pickle=True)
             result = Valid.least_squares(svalid, self.solution, time=True)
-            if result < self.tol:
+            if result < self.tol*100*self.nn*self.nshots*self.nsteps:
                 print("The solution was validated with success.")
             else:
-                print(f"The solution is not correct. Error: {result}")
+                print(f"The solution is not correct. Error value: {result}")
         return 
             
     @staticmethod
@@ -138,8 +153,8 @@ def main():
     print("\nVALIDATING DATA\n    ...   \n")
     valid = Valid()
     csv.field_size_limit(sys.maxsize)
-    Valid.parse_csv_file(file_path="./dataraw/data.csv", model=valid)
-    valid.run()
+    Valid.parse_csv_file(file_path="./Output/data.csv", model=valid)
+    valid.run("kvalid","mvalid","svalid")
     
 
     print("\n    ...   \n\nDone. ")

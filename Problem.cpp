@@ -77,7 +77,8 @@ void Problem::solve(std::string mode) {
     arma::colvec dotp = arma::colvec(nn);
     arma::colvec ddotp = arma::colvec(nn);
     arma::colvec paux = arma::colvec(nn);
-    arma::colvec bar_stiffness = arma::colvec(nn);
+    arma::colvec bar_stiffness;
+    double force {0.0};
     
     //Shots loop (PARALLEL OPENMP DIRECTIVE)
     //#pragma omp parallel for
@@ -94,14 +95,15 @@ void Problem::solve(std::string mode) {
         for (arma::uword t = 1; t < n_steps; t++) {
                 
             //Calculating term related to the constant stiffness
-            bar_stiffness = global_stiffness_sparse*(p + dt * dotp + 0.5 * dt * dt * ddotp);
-                
+            bar_stiffness = (*global_stiffness_consistent)*(p + dt * dotp + 0.5 * dt * dt * ddotp);
+            //bar_stiffness = arma::dot(global_stiffness_sparse,(p + dt * dotp + 0.5 * dt * dt * ddotp));
+ 
             //Node loop (PARALLEL OPENMP DIRECTIVE)
             //#pragma omp parallel for
             for (arma::uword n = 0; n < nn; n++) {
                     
                 //Here we look whether the node "n" has a force or not (if it is source node or not)
-                double force = 0.0;
+                force = 0.0;
                 if (n+1 == source_nodes(s)) {
                     force = (*ricker_pulse)(t);
                 }
@@ -110,9 +112,11 @@ void Problem::solve(std::string mode) {
                 ddotp(n) = (force - bar_stiffness(n)) / (*global_mass)(n);
                 
                 //Updating p(solution), dotp, and auxiliary vector "paux"
-                (*solution)(n,t,s) += dt*dotp(n) + dt*dt*0.5*paux(n);
+                p(n) += dt*dotp(n) + dt*dt*0.5*paux(n);
                 dotp(n) += dt*0.5*(paux(n)+ddotp(n));
                 paux(n) = ddotp(n);
+                
+                (*solution)(n,t,s) = p(n);
         
             }
         }
@@ -436,7 +440,7 @@ double Problem::find_element_slowness(unsigned int element) {
 
 /*   ===============  Control methods  ===============  */
 
-void Problem::set_control(unsigned int n_levels, double* levels, double* velocities_arr) {
+void Problem::set_control(unsigned int n_levels, std::vector<double> levels, std::vector<double> velocities_arr) {
     control->set(n_levels, levels, velocities_arr);
 }
 
@@ -517,9 +521,9 @@ void Problem::print_sources() {
 
 void Problem::write_output() {
     
-    std::cout << "Writing output to './dataraw/data.csv'    ...   " << std::flush;
+    std::cout << "Writing output to './Output/data.csv'    ...   " << std::flush;
     //Open the CSV file for writing
-    std::ofstream file("./dataraw/data.csv");
+    std::ofstream file("./Output/data.csv");
     if (!file.is_open()) {
         std::cerr << "Error opening file to write output." << std::endl;
     }
@@ -527,7 +531,7 @@ void Problem::write_output() {
     //Useful shortcuts and settings
     unsigned int nn = problem_mesh->get_number_of_nodes();
     unsigned int ne = problem_mesh->get_number_of_elements();
-    int decimal_places = 10;
+    int decimal_places = 14;
     float factor = pow(10, decimal_places);
     unsigned int i_max {0};
     
