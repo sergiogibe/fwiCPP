@@ -41,5 +41,5 @@ target_link_libraries(
 target_include_directories(
     fwiCPP
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/third-party/nlohmann/json/
+        ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/nlohmann/json/
 )
