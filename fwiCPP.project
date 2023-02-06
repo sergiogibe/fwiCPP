@@ -3,6 +3,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="README.md"/>
     <File Name="settings.json"/>
     <File Name="ProcessData.py"/>
     <File Name="ValidationScript.py"/>

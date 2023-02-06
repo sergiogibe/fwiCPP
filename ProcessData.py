@@ -80,6 +80,11 @@ class ProblemData:
         print(f"Levels: {[self.levels[i] for i in range(self.nlvls)]}")
         
     def save(self):
+        folder_name = "images"
+        try:
+            os.mkdir(folder_name)
+        except OSError:
+            print(f"Failed to create folder '{folder_name}'")
         self.plt_pulse()
         self.plt_contour()
         self.render_propagation()
