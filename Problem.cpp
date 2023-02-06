@@ -80,7 +80,18 @@ void Problem::solve(std::string mode) {
     arma::colvec paux = arma::colvec(nn);
     arma::colvec bar_stiffness;
     double force {0.0};
-    
+
+    // Code below is temporary while we can't validate if the sparse matrix yields the exact same results
+    // as the dense matrix. We can remove it after we add automated testing to see that the results are
+    // indeed the same.
+#define USE_SPARSE_MATRIX
+#ifdef USE_SPARSE_MATRIX
+    auto stiff_mat = arma::sp_mat(*global_stiffness_consistent);
+#else
+    auto stiff_mat = arma::mat(*global_stiffness_consistent);
+#endif
+#undef USE_SPARSE_MATRIX
+
     //Shots loop (PARALLEL OPENMP DIRECTIVE)
     //#pragma omp parallel for
     for (arma::uword s = 0; s < n_shots; s++) {
@@ -96,9 +107,8 @@ void Problem::solve(std::string mode) {
         for (arma::uword t = 1; t < n_steps; t++) {
                 
             //Calculating term related to the constant stiffness
-            bar_stiffness = (*global_stiffness_consistent)*(p + dt * dotp + 0.5 * dt * dt * ddotp);
-            //bar_stiffness = arma::dot(global_stiffness_sparse,(p + dt * dotp + 0.5 * dt * dt * ddotp));
- 
+            bar_stiffness = stiff_mat*(p + dt * dotp + 0.5 * dt * dt * ddotp);
+
             //Node loop (PARALLEL OPENMP DIRECTIVE)
             //#pragma omp parallel for
             for (arma::uword n = 0; n < nn; n++) {
