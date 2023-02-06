@@ -1,6 +1,5 @@
 
-
-## High-performance acoustic simulation
+# High-performance acoustic simulation:
 
 This solver is be capable of accurately and efficiently computing the propagation of 
 sound waves in complex geometries and through various materials with varying acoustic 
@@ -13,11 +12,50 @@ The program has an user-friendly and flexible interface, allowing for easy integ
 other FWI implementations and enabling the simulation of a wide range of acoustic scenarios. 
 
 
+## Table of contents:
+
+- Installation
+  - Required libraries
+  - Cmake setup
+  - Manual setup
+- General guidelines
+- Examples and images
+- Upcoming features
+- Contributors
+
+
+## Installation:
+
+```
+armadillo
+nlohmann json
+openBLAS
+LAPACK
+Numpy
+Matplotlib
+
+```
+
+
+## General guidelines:
 
 
 
 
+## Examples and images:
 
+
+
+## Upcoming features:
+
+- [] PML boundaries
+- [] GPU support
+
+
+## Contributors:
+
+- Sergio Santos
+- Tarcisio Fischer
 
 
 
