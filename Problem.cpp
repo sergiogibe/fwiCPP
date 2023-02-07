@@ -81,17 +81,6 @@ void Problem::solve(std::string mode) {
     arma::colvec bar_stiffness;
     double force {0.0};
 
-    // Code below is temporary while we can't validate if the sparse matrix yields the exact same results
-    // as the dense matrix. We can remove it after we add automated testing to see that the results are
-    // indeed the same.
-#define USE_SPARSE_MATRIX
-#ifdef USE_SPARSE_MATRIX
-    auto stiff_mat = arma::sp_mat(*global_stiffness_consistent);
-#else
-    auto stiff_mat = arma::mat(*global_stiffness_consistent);
-#endif
-#undef USE_SPARSE_MATRIX
-
     //Shots loop (PARALLEL OPENMP DIRECTIVE)
     //#pragma omp parallel for
     for (arma::uword s = 0; s < n_shots; s++) {
@@ -107,7 +96,7 @@ void Problem::solve(std::string mode) {
         for (arma::uword t = 1; t < n_steps; t++) {
                 
             //Calculating term related to the constant stiffness
-            bar_stiffness = stiff_mat*(p + dt * dotp + 0.5 * dt * dt * ddotp);
+            bar_stiffness = (*global_stiffness_consistent)*(p + dt * dotp + 0.5 * dt * dt * ddotp);
 
             //Node loop (PARALLEL OPENMP DIRECTIVE)
             //#pragma omp parallel for
@@ -153,12 +142,9 @@ void Problem::build() {
     
     //Stiffness frame calculation
     calculate_stiffness_matrix();
-    arma::sp_mat aux_sparse(*global_stiffness_consistent);
-    global_stiffness_sparse = aux_sparse;
-    
+
     //Setting up consistent and lumped global mass matrix
-    global_mass_consistent = new arma::mat;
-    global_mass_consistent->zeros(problem_mesh->get_number_of_nodes(),problem_mesh->get_number_of_nodes());
+    global_mass_consistent = new arma::sp_mat(problem_mesh->get_number_of_nodes(),problem_mesh->get_number_of_nodes());
     global_mass = new arma::mat;
     global_mass->zeros(problem_mesh->get_number_of_nodes());
     
@@ -254,9 +240,7 @@ void Problem::calculate_stiffness_matrix() {
     find_element_coordinates(element_coord, which_element);
     find_element_stiffness(element_stiffness, element_coord);
     
-    //Setting this->global stiffness matrix (arma matrix instance pointer to heap)
-    global_stiffness_consistent = new arma::mat;
-    global_stiffness_consistent->zeros(problem_mesh->get_number_of_nodes(),problem_mesh->get_number_of_nodes());
+    global_stiffness_consistent = new arma::sp_mat(problem_mesh->get_number_of_nodes(),problem_mesh->get_number_of_nodes());
     arma::mat aux_matrix;
     aux_matrix.zeros(4);
     
