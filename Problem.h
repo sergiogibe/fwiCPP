@@ -70,7 +70,7 @@ public:
     void print_receivers();
     void print_sources();
     void print_pulse();
-    void write_output();
+    void write_output(bool save_valid, bool save_solution);
     
     //Getters
     

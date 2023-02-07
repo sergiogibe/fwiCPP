@@ -139,12 +139,15 @@ void Problem::solve(std::string mode) {
 void Problem::update() {
     
     //Update the problem calculating the mass matrix (and lumped one)
+    std::cout << "Applying medium properties    ...   " << std::flush;
     calculate_mass_matrix();
     lumping_mass("diagonal_scale");
+    std::cout << "Done. " << std::endl;
 }
 
 void Problem::build() {
     
+    std::cout << "Building problem    ...   " << std::flush;
     //Time setup
     generate_ricker_pulse();
     
@@ -172,6 +175,8 @@ void Problem::build() {
         source_nodes(i) = device.get_global_node();
         i++;
     }
+    
+    std::cout << "Done. " << std::endl;
 }
 
 
@@ -530,7 +535,7 @@ void Problem::print_sources() {
 
 /*  ===============   Data Output  ===============  */
 
-void Problem::write_output() {
+void Problem::write_output(bool save_valid = false, bool save_solution = false) {
     
     std::cout << "Writing output to './Output/data.csv'    ...   " << std::flush;
     std::filesystem::create_directory("./Output/");
@@ -546,6 +551,12 @@ void Problem::write_output() {
     int decimal_places = 14;
     float factor = pow(10, decimal_places);
     unsigned int i_max {0};
+    if (save_solution == false) { 
+        save_valid = false;
+    }
+    if (save_valid == true) {
+        save_solution = true;
+    }
     
     //Write the configuration as the first line (ROW 0)
     file 
@@ -560,72 +571,75 @@ void Problem::write_output() {
     << n_steps                << ","
     << receivers.size()       << ","
     << sources.size()         << ","
-    << control->get_nlvls()   << "\n"; 
+    << control->get_nlvls()   << ","
+    << save_valid             << ","
+    << save_solution; 
     
     //Write the Ricker pulse to the file (ROW 1)
+    file << "\n";
     for (unsigned int i = 0; i < n_steps; ++i) {
         file << (*ricker_pulse)(i);
         if (i < n_steps - 1) {
             file << ",";
         }
     }
-    file << "\n";
     
     //Write the control function to the file (ROW 2)
+    file << "\n";
     for (unsigned int i = 0; i < nn; ++i) {
         file << (*control->get_control_function())(i);
         if (i < nn - 1) {
             file << ",";
         }
     }
-    file << "\n";
     
     //Write control function levels to the file (ROW 3)
+    file << "\n";
     for (unsigned int i = 0; i < control->get_nlvls(); ++i) {
         file << (*control->get_levels())(i);
         if (i < control->get_nlvls() - 1) {
             file << ",";
         }
     }
-    file << "\n";
     
     //Write the receivers x coordinates to the file (ROW 4)
+    file << "\n";
     for (unsigned int i = 0; i < receivers.size(); ++i) {
         file << receivers[i].get_xcoord();
         if (i < receivers.size() - 1) {
             file << ",";
         }
     }
-    file << "\n";
     
     //Write the receivers y coordinates to the file (ROW 5)
+    file << "\n";
     for (unsigned int i = 0; i < receivers.size(); ++i) {
         file << receivers[i].get_ycoord();
         if (i < receivers.size() - 1) {
             file << ",";
         }
     }
-    file << "\n";
     
     //Write the sources x coordinates to the file (ROW 6)
+    file << "\n";
     for (unsigned int i = 0; i < sources.size(); ++i) {
         file << sources[i].get_xcoord();
         if (i < sources.size() - 1) {
             file << ",";
         }
     }
-    file << "\n";
     
     //Write the sources y coordinates to the file (ROW 7)
+    file << "\n";
     for (unsigned int i = 0; i < sources.size(); ++i) {
         file << sources[i].get_ycoord();
         if (i < sources.size() - 1) {
             file << ",";
         }
     }
-    file << "\n";
     
     //Write the connectivity to the file (ROW 8)
+    file << "\n";
     for (unsigned int e = 0; e < ne; ++e) {
        file << problem_mesh->get_connectivity()[e].global_node1 << ",";
         file << problem_mesh->get_connectivity()[e].global_node2 << ",";
@@ -636,48 +650,50 @@ void Problem::write_output() {
             file << ",";
         }
     }
-    file << "\n";
     
     //Write the solution to the file (ROW 9)
-    i_max = 0;
-    for (unsigned int s = 0; s < sources.size(); ++s) {
-        for (unsigned int t = 0; t < n_steps; ++t) {
-            for (unsigned int n = 0; n < nn; ++n) {
-                file << round((*solution)(n,t,s) * factor) / factor;
+    if (save_solution) {
+        file << "\n";
+        i_max = 0;
+        for (unsigned int s = 0; s < sources.size(); ++s) {
+            for (unsigned int t = 0; t < n_steps; ++t) {
+                for (unsigned int n = 0; n < nn; ++n) {
+                    file << round((*solution)(n,t,s) * factor) / factor;
+                    i_max++;
+                    if (i_max != sources.size()*n_steps*nn) {
+                        file << ",";
+                    }
+                }
+            }
+        }
+    }
+    
+    //Write the stiffness matrix (constant matrix) to the file (ROW 10)
+    if (save_valid) {
+        file << "\n";
+        i_max = 0;
+        for (arma::uword j = 0; j < nn; ++j) {
+            for (arma::uword i = 0; i < nn; ++i) {
+                file << round((*global_stiffness_consistent)(i,j) * factor) / factor;
                 i_max++;
-                if (i_max != sources.size()*n_steps*nn) {
+                if (i_max != nn*nn) {
+                    file << ",";
+                }
+            }
+        }
+        //Write the mass matrix to the file (ROW 11)
+        file << "\n";
+        i_max = 0;
+        for (arma::uword j = 0; j < nn; ++j) {
+            for (arma::uword i = 0; i < nn; ++i) {
+                file << round((*global_mass_consistent)(i,j) * factor) / factor;
+                i_max++;
+                if (i_max != nn*nn) {
                     file << ",";
                 }
             }
         }
     }
-    file << "\n";
-    
-    //Write the stiffness matrix (constant matrix) to the file (ROW 10)
-    i_max = 0;
-    for (arma::uword j = 0; j < nn; ++j) {
-        for (arma::uword i = 0; i < nn; ++i) {
-            file << round((*global_stiffness_consistent)(i,j) * factor) / factor;
-            i_max++;
-            if (i_max != nn*nn) {
-                file << ",";
-            }
-        }
-    }
-    file << "\n";
-    
-    //Write the mass matrix to the file (ROW 10)
-    i_max = 0;
-    for (arma::uword j = 0; j < nn; ++j) {
-        for (arma::uword i = 0; i < nn; ++i) {
-            file << round((*global_mass_consistent)(i,j) * factor) / factor;
-            i_max++;
-            if (i_max != nn*nn) {
-                file << ",";
-            }
-        }
-    }
-    file << "\n";
 
     //Close the file
     file.close();

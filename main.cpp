@@ -29,8 +29,10 @@ int main(){
                             settings["levelset"]["init"]
                          };
                           
-    real_problem.add_device("receiver",1.0,1.0,0);
-    real_problem.add_device("source",  1.5,1.5,0);
+    real_problem.add_device("receiver", 1.0, 1.0, 0);
+    real_problem.add_device("source",   1.5, 1.5, 0);
+    real_problem.add_device("source",   1.5, 1.5, 1);
+    real_problem.add_device("source",   1.5, 1.5, 2);
 //    real_problem.add_device("source",  1.0,1.5,0);
 //    real_problem.add_device("source",  1.5,1.0,0);
 
@@ -40,7 +42,8 @@ int main(){
     
     real_problem.build();
     real_problem.solve("forward_only");
-    real_problem.write_output();
+    real_problem.write_output(settings["output"]["save_valid"],
+                              settings["output"]["save_solution"]);
     
     
 

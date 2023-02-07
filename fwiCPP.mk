@@ -14,7 +14,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Sergio Britto
-Date                   :=05/02/23
+Date                   :=06/02/23
 CodeLitePath           :=/home/sergiobritto/.codelite
 LinkerName             :=/usr/bin/g++
 SharedObjectLinkerName :=/usr/bin/g++ -shared -fPIC
@@ -62,7 +62,7 @@ AS       := /usr/bin/as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/Device.cpp$(ObjectSuffix) $(IntermediateDirectory)/Mesh.cpp$(ObjectSuffix) $(IntermediateDirectory)/Problem.cpp$(ObjectSuffix) $(IntermediateDirectory)/MaterialModel.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/Mesh.cpp$(ObjectSuffix) $(IntermediateDirectory)/MaterialModel.cpp$(ObjectSuffix) $(IntermediateDirectory)/Device.cpp$(ObjectSuffix) $(IntermediateDirectory)/Problem.cpp$(ObjectSuffix) 
 
 
 
@@ -99,29 +99,29 @@ $(IntermediateDirectory)/main.cpp$(ObjectSuffix): main.cpp
 $(IntermediateDirectory)/main.cpp$(PreprocessSuffix): main.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/main.cpp$(PreprocessSuffix) main.cpp
 
-$(IntermediateDirectory)/Device.cpp$(ObjectSuffix): Device.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/Device.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/Device.cpp$(DependSuffix) -MM Device.cpp
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/sergiobritto/Dev/c++Dev/fwisv/fwiCPP/fwiCPP/Device.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/Device.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/Device.cpp$(PreprocessSuffix): Device.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/Device.cpp$(PreprocessSuffix) Device.cpp
-
 $(IntermediateDirectory)/Mesh.cpp$(ObjectSuffix): Mesh.cpp
 	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/Mesh.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/Mesh.cpp$(DependSuffix) -MM Mesh.cpp
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/sergiobritto/Dev/c++Dev/fwisv/fwiCPP/fwiCPP/Mesh.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/Mesh.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/Mesh.cpp$(PreprocessSuffix): Mesh.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/Mesh.cpp$(PreprocessSuffix) Mesh.cpp
 
-$(IntermediateDirectory)/Problem.cpp$(ObjectSuffix): Problem.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/Problem.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/Problem.cpp$(DependSuffix) -MM Problem.cpp
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/sergiobritto/Dev/c++Dev/fwisv/fwiCPP/fwiCPP/Problem.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/Problem.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/Problem.cpp$(PreprocessSuffix): Problem.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/Problem.cpp$(PreprocessSuffix) Problem.cpp
-
 $(IntermediateDirectory)/MaterialModel.cpp$(ObjectSuffix): MaterialModel.cpp
 	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/MaterialModel.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/MaterialModel.cpp$(DependSuffix) -MM MaterialModel.cpp
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/sergiobritto/Dev/c++Dev/fwisv/fwiCPP/fwiCPP/MaterialModel.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/MaterialModel.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/MaterialModel.cpp$(PreprocessSuffix): MaterialModel.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/MaterialModel.cpp$(PreprocessSuffix) MaterialModel.cpp
+
+$(IntermediateDirectory)/Device.cpp$(ObjectSuffix): Device.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/Device.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/Device.cpp$(DependSuffix) -MM Device.cpp
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/sergiobritto/Dev/c++Dev/fwisv/fwiCPP/fwiCPP/Device.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/Device.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/Device.cpp$(PreprocessSuffix): Device.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/Device.cpp$(PreprocessSuffix) Device.cpp
+
+$(IntermediateDirectory)/Problem.cpp$(ObjectSuffix): Problem.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/Problem.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/Problem.cpp$(DependSuffix) -MM Problem.cpp
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/sergiobritto/Dev/c++Dev/fwisv/fwiCPP/fwiCPP/Problem.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/Problem.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/Problem.cpp$(PreprocessSuffix): Problem.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/Problem.cpp$(PreprocessSuffix) Problem.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)
