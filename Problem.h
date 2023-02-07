@@ -34,9 +34,8 @@ private:
     SquareLinearMesh* problem_mesh;
     MaterialModel* control;
     arma::mat* ricker_pulse; 
-    arma::mat* global_stiffness_consistent;
-    arma::sp_mat global_stiffness_sparse;
-    arma::mat* global_mass_consistent;
+    arma::sp_mat* global_stiffness_consistent;
+    arma::sp_mat* global_mass_consistent;
     arma::mat* global_mass;
     std::vector<Device> receivers;
     std::vector<Device> sources;
