@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 import sys
+import os
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.ticker import MaxNLocator
@@ -17,7 +18,7 @@ class ProblemData:
                         (0.0, 0.0, 0.0)   # 'black'
                       ]   
     
-    def fill(self, nn, nel, ned, length, depth, I, freq, dt, nsteps, nrec, nshots, nlvls):
+    def fill(self, nn, nel, ned, length, depth, I, freq, dt, nsteps, nrec, nshots, nlvls, save_valid, save_solution):
         #General config attributes
         self.nn = int(nn)
         self.nel = int(nel)
@@ -32,6 +33,8 @@ class ProblemData:
         self.nrec = int(nrec)
         self.nshots = int(nshots)
         self.nlvls = int(nlvls)
+        self.save_valid = bool(int(save_valid))
+        self.save_solution = bool(int(save_solution))
         
         #Model attributes
         self.pulse = np.zeros((self.nsteps))
@@ -78,18 +81,20 @@ class ProblemData:
         print(f"Number of shots: {self.nshots}")
         print(f"Number of control function levels: {self.nlvls}")
         print(f"Levels: {[self.levels[i] for i in range(self.nlvls)]}")
+        print(f"Saving validation data: {self.save_valid}")
+        print(f"Saving solution to render propagation: {self.save_solution}")
         
-    def save(self):
-        folder_name = "images"
-        try:
+    def save(self, folder_name):
+        if os.path.exists(f"./{folder_name}") is False:
             os.mkdir(folder_name)
-        except OSError:
-            print(f"Failed to create folder '{folder_name}'")
-        self.plt_pulse()
-        self.plt_contour()
-        self.render_propagation()
+            
+        self.plt_pulse(folder_name)
+        self.plt_contour(folder_name)
         
-    def render_propagation(self, shot=0, sample_size=10, save=False):
+        if self.save_solution:
+            self.render_propagation(folder_name)
+        
+    def render_propagation(self, folder_name, shot=0, sample_size=10, save=False, show=True):
         if save is False:
             show = True
 
@@ -123,7 +128,7 @@ class ProblemData:
             plt.show()
         
         
-    def plt_contour(self, fig_number=0, name="contour", fill=True, pltSR=True, show=False):
+    def plt_contour(self, folder_name, fig_number=0, name="contour", fill=True, pltSR=True, show=False):
         vp = np.zeros((self.nel+1, self.ned+1))
         for j in range(self.ned+1):
             for i in range(self.nel+1):
@@ -167,7 +172,7 @@ class ProblemData:
             plt.show()
         plt.close()
         
-    def plt_pulse(self, show=False):
+    def plt_pulse(self, folder_name, show=False):
         fig, ax = plt.subplots(dpi=300)
         ax.plot([i for i in range(self.nsteps)], self.pulse, 'b')
         plt.xlim(0.0, self.nsteps)
@@ -203,7 +208,7 @@ class ProblemData:
             reader = csv.reader(file)
             for row in reader:
                 if row_counter == 0:
-                    model.fill(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11])
+                    model.fill(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13])
                 if row_counter == 1:
                     for i in range(len(row)):
                         model.pulse[i] = float(row[i])
@@ -231,6 +236,7 @@ class ProblemData:
                 if row_counter == 9:
                     for i in range(model.nshots*model.nsteps*model.nn):
                         model.raw_solution[i] = float(row[i])
+                        
                 else:
                     pass
                 row_counter += 1
@@ -244,7 +250,7 @@ def main():
     csv.field_size_limit(sys.maxsize)
     ProblemData.parse_csv_file(file_path="./Output/data.csv", model=problem)
     problem.log()
-    problem.save()
+    problem.save(folder_name="images")
     
     
     
