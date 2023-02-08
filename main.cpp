@@ -42,10 +42,10 @@ int main(){
     
     real_problem.build();
     real_problem.solve("forward_only");
-    real_problem.write_output(settings["output"]["save_valid"],
-                              settings["output"]["save_solution"]);
-    
-    
+    real_problem.write_output(settings["output"]["save_solution"],
+                              settings["output"]["shot_id"], 
+                              settings["output"]["sample_size"]);
+
 
     std::cout << " " << std::endl;
     std::cout << "This program ended succesfully. " << std::endl; 

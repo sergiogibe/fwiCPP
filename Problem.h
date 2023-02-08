@@ -69,7 +69,8 @@ public:
     void print_receivers();
     void print_sources();
     void print_pulse();
-    void write_output(bool save_valid, bool save_solution);
+    void write_valid();
+    void write_output(bool save_solution, unsigned int shot_id, unsigned int sample_size);
     
     //Getters
     
