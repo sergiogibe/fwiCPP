@@ -519,7 +519,7 @@ void Problem::print_sources() {
 
 /*  ===============   Data Output  ===============  */
 
-void Problem::write_valid() {
+void Problem::write_validation() {
     
     std::cout << "Writing validation data to './Output/valid.csv'    ...   " << std::flush;
     std::filesystem::create_directory("./Output/");
@@ -527,6 +527,7 @@ void Problem::write_valid() {
     std::ofstream file("./Output/valid.csv");
     if (!file.is_open()) {
         std::cerr << "Error opening file to write output." << std::endl;
+        return;
     }
     
     //Useful shortcuts and settings
@@ -604,6 +605,7 @@ void Problem::write_output(bool save_solution, unsigned int shot_id = 0, unsigne
     std::ofstream file("./Output/data.csv");
     if (!file.is_open()) {
         std::cerr << "Error opening file to write output." << std::endl;
+        return;
     }
     
     //Shortcuts and settings
