@@ -121,9 +121,9 @@ class Valid:
         '''
         Index:
         Row 0 - Problem configuration
-        Row 9 - Solution field
-        *Row 10 - Validation script only (Stiffness)
-        *Row 11 - Validation script only (Mass)
+        Row 1 - Solution field (FULL)
+        Row 2 - Stiffness matrix
+        Row 3 - Mass matrix
         
         '''
         row_counter = 0
@@ -132,13 +132,13 @@ class Valid:
             for row in reader:
                 if row_counter == 0:
                     model.fill(row[0],row[8],row[10])
-                if row_counter == 9:
+                if row_counter == 1:
                     for i in range(model.nshots*model.nsteps*model.nn):
                         model.raw_solution[i] = float(row[i])
-                if row_counter == 10:
+                if row_counter == 2:
                     for i in range(model.nn*model.nn):
                         model.raw_stiffness[i] = float(row[i])
-                if row_counter == 11:
+                if row_counter == 3:
                     for i in range(model.nn*model.nn):
                         model.raw_mass[i] = float(row[i])
                 else:
@@ -153,7 +153,7 @@ def main():
     print("\nVALIDATING DATA\n    ...   \n")
     valid = Valid()
     csv.field_size_limit(sys.maxsize)
-    Valid.parse_csv_file(file_path="./Output/data.csv", model=valid)
+    Valid.parse_csv_file(file_path="./Output/valid.csv", model=valid)
     valid.run("kvalid","mvalid","svalid")
     
 

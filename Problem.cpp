@@ -519,7 +519,85 @@ void Problem::print_sources() {
 
 /*  ===============   Data Output  ===============  */
 
-void Problem::write_output(bool save_valid = false, bool save_solution = false) {
+void Problem::write_validation() {
+    
+    std::cout << "Writing validation data to './Output/valid.csv'    ...   " << std::flush;
+    std::filesystem::create_directory("./Output/");
+    //Open the CSV file for writing
+    std::ofstream file("./Output/valid.csv");
+    if (!file.is_open()) {
+        std::cerr << "Error opening file to write output." << std::endl;
+        return;
+    }
+    
+    //Useful shortcuts and settings
+    unsigned int nn = problem_mesh->get_number_of_nodes();
+    int decimal_places = 14;
+    float factor = pow(10, decimal_places);
+    unsigned int i_max {0};
+    
+    //Write the configuration as the first line (ROW 0)
+    file 
+    << nn                     << ","
+    << number_elements_length << "," 
+    << number_elements_depth  << ","
+    << domain_length          << ","
+    << domain_depth           << ","
+    << pulse_intensity        << ","
+    << pulse_frequency        << ","
+    << delta_time             << ","
+    << n_steps                << ","
+    << receivers.size()       << ","
+    << sources.size()         << ","
+    << control->get_nlvls();
+    
+    //Write the solution to the file (ROW 1)
+    file << "\n";
+    i_max = 0;
+    for (unsigned int s = 0; s < sources.size(); ++s) {
+        for (unsigned int t = 0; t < n_steps; ++t) {
+            for (unsigned int n = 0; n < nn; ++n) {
+                file << round((*solution)(n,t,s) * factor) / factor;
+                i_max++;
+                if (i_max != sources.size()*n_steps*nn) {
+                    file << ",";
+                }
+            }
+        }
+    }
+    
+    //Write the stiffness matrix (constant matrix) to the file (ROW 2)
+    file << "\n";
+    i_max = 0;
+    for (arma::uword j = 0; j < nn; ++j) {
+        for (arma::uword i = 0; i < nn; ++i) {
+            file << round((*global_stiffness_consistent)(i,j) * factor) / factor;
+            i_max++;
+            if (i_max != nn*nn) {
+                file << ",";
+            }
+        }
+    }
+    //Write the mass matrix to the file (ROW 3)
+    file << "\n";
+    i_max = 0;
+    for (arma::uword j = 0; j < nn; ++j) {
+        for (arma::uword i = 0; i < nn; ++i) {
+            file << round((*global_mass_consistent)(i,j) * factor) / factor;
+            i_max++;
+            if (i_max != nn*nn) {
+                file << ",";
+            }
+        }
+    }
+    
+    //Close the file
+    file.close();
+    std::cout << "Done. " << std::endl;
+    
+}
+
+void Problem::write_output(bool save_solution, unsigned int shot_id = 0, unsigned int sample_size = 50) {
     
     std::cout << "Writing output to './Output/data.csv'    ...   " << std::flush;
     std::filesystem::create_directory("./Output/");
@@ -527,20 +605,21 @@ void Problem::write_output(bool save_valid = false, bool save_solution = false) 
     std::ofstream file("./Output/data.csv");
     if (!file.is_open()) {
         std::cerr << "Error opening file to write output." << std::endl;
+        return;
     }
     
-    //Useful shortcuts and settings
+    //Shortcuts and settings
     unsigned int nn = problem_mesh->get_number_of_nodes();
     unsigned int ne = problem_mesh->get_number_of_elements();
     int decimal_places = 14;
     float factor = pow(10, decimal_places);
     unsigned int i_max {0};
-    if (save_solution == false) { 
-        save_valid = false;
-    }
-    if (save_valid == true) {
-        save_solution = true;
-    }
+    unsigned int nl = problem_mesh->get_nel()+1;
+    unsigned int nd = problem_mesh->get_ned()+1;
+    unsigned int nsteps_l = sample_size;
+    unsigned int step_size_l = static_cast<unsigned int>(floor(nl/nsteps_l));
+    unsigned int nsteps_d = static_cast<unsigned int>(floor(nd/step_size_l));
+    unsigned int step_size_d = static_cast<unsigned int>(floor(nd/nsteps_d));
     
     //Write the configuration as the first line (ROW 0)
     file 
@@ -556,8 +635,9 @@ void Problem::write_output(bool save_valid = false, bool save_solution = false) 
     << receivers.size()       << ","
     << sources.size()         << ","
     << control->get_nlvls()   << ","
-    << save_valid             << ","
-    << save_solution; 
+    << save_solution          << ","
+    << nsteps_l               << ","
+    << nsteps_d;
     
     //Write the Ricker pulse to the file (ROW 1)
     file << "\n";
@@ -639,46 +719,24 @@ void Problem::write_output(bool save_valid = false, bool save_solution = false) 
     if (save_solution) {
         file << "\n";
         i_max = 0;
-        for (unsigned int s = 0; s < sources.size(); ++s) {
-            for (unsigned int t = 0; t < n_steps; ++t) {
-                for (unsigned int n = 0; n < nn; ++n) {
-                    file << round((*solution)(n,t,s) * factor) / factor;
-                    i_max++;
-                    if (i_max != sources.size()*n_steps*nn) {
-                        file << ",";
-                    }
+        unsigned int n {0};
+        unsigned int p {0};
+        unsigned int q {0};
+  
+        for (unsigned int t = 0; t < n_steps; ++t) {
+            for (unsigned int j = 0; j < nsteps_d; ++j) {
+                for (unsigned int i = 0; i < nsteps_l; ++i) {
+                    
+                    p = i*step_size_l;
+                    q = j*step_size_d;
+    
+                    n = (p+(nl*q));
+                    file << round((*solution)(n,t,shot_id) * factor) / factor << ",";
                 }
             }
         }
     }
     
-    //Write the stiffness matrix (constant matrix) to the file (ROW 10)
-    if (save_valid) {
-        file << "\n";
-        i_max = 0;
-        for (arma::uword j = 0; j < nn; ++j) {
-            for (arma::uword i = 0; i < nn; ++i) {
-                file << round((*global_stiffness_consistent)(i,j) * factor) / factor;
-                i_max++;
-                if (i_max != nn*nn) {
-                    file << ",";
-                }
-            }
-        }
-        //Write the mass matrix to the file (ROW 11)
-        file << "\n";
-        i_max = 0;
-        for (arma::uword j = 0; j < nn; ++j) {
-            for (arma::uword i = 0; i < nn; ++i) {
-                file << round((*global_mass_consistent)(i,j) * factor) / factor;
-                i_max++;
-                if (i_max != nn*nn) {
-                    file << ",";
-                }
-            }
-        }
-    }
-
     //Close the file
     file.close();
     std::cout << "Done. " << std::endl;

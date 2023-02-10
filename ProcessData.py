@@ -18,7 +18,7 @@ class ProblemData:
                         (0.0, 0.0, 0.0)   # 'black'
                       ]   
     
-    def fill(self, nn, nel, ned, length, depth, I, freq, dt, nsteps, nrec, nshots, nlvls, save_valid, save_solution):
+    def fill(self, nn, nel, ned, length, depth, I, freq, dt, nsteps, nrec, nshots, nlvls, save_solution, sample_l, sample_d):
         #General config attributes
         self.nn = int(nn)
         self.nel = int(nel)
@@ -33,14 +33,15 @@ class ProblemData:
         self.nrec = int(nrec)
         self.nshots = int(nshots)
         self.nlvls = int(nlvls)
-        self.save_valid = bool(int(save_valid))
         self.save_solution = bool(int(save_solution))
+        self.sample_l = int(sample_l)
+        self.sample_d = int(sample_d)
         
         #Model attributes
         self.pulse = np.zeros((self.nsteps))
         self.control = np.zeros((self.nn))
         self.levels = np.zeros((self.nlvls))
-        self.raw_solution = np.zeros((self.nshots*self.nsteps*self.nn))
+        self.raw_solution = np.zeros((self.sample_l*self.sample_d*self.nsteps))
         self.raw_connectivity = np.zeros((4*self.ne))
         self.receivers_x = np.zeros((self.nrec))
         self.receivers_y = np.zeros((self.nrec))
@@ -48,15 +49,14 @@ class ProblemData:
         self.sources_y = np.zeros((self.nshots))
         
     def update(self):
-        self.solution = np.zeros((self.nn,self.nsteps,self.nshots))
+        self.solution = np.zeros((self.nn,self.nsteps))
         index = 0
-        for s in range(self.nshots):
-            for t in range(self.nsteps):
-                for n in range(self.nn):
-                    self.solution[n,t,s] = self.raw_solution[index]
-                    index += 1
+        for t in range(self.nsteps):
+            for n in range(self.sample_l*self.sample_d):
+                self.solution[n,t] = self.raw_solution[index]
+                index += 1
                     
-        self.connectivity = np.zeros((self.ne,4),dtype=int)
+        self.connectivity = np.zeros((self.ne,4),dtype=int) #NOT USING IT YET
         index = 0
         for e in range(self.ne):
             for n in range(4):
@@ -81,7 +81,6 @@ class ProblemData:
         print(f"Number of shots: {self.nshots}")
         print(f"Number of control function levels: {self.nlvls}")
         print(f"Levels: {[self.levels[i] for i in range(self.nlvls)]}")
-        print(f"Saving validation data: {self.save_valid}")
         print(f"Saving solution to render propagation: {self.save_solution}")
         
     def save(self, folder_name):
@@ -101,23 +100,17 @@ class ProblemData:
         ims = []
         steps = self.nsteps//sample_size
 
-        aux = np.zeros((self.nel*self.ned))
-        axField = np.zeros((self.ned,self.nel))
+        aux = np.zeros((self.sample_l*self.sample_d))
+        axField = np.zeros((self.sample_d,self.sample_l))
 
         fig, ax = plt.subplots(dpi=300)
 
         for t in range(steps):
             time = sample_size*t
             if time < self.nsteps:
-                for e in range(self.ne):
-                    counter = 0
-                    for node in range(4):
-                        counter += 0.25 * self.solution[self.connectivity[e, node] - 1, time, shot]
-                    aux[e] = counter
-
-                for j in range(self.ned):
-                    for i in range(self.nel):
-                        axField[(self.ned - 1) - j, i] = aux[i + j * self.nel]
+                for j in range(self.sample_d):
+                    for i in range(self.sample_l):
+                        axField[(self.sample_d - 1) - j, i] = self.solution[i + j * self.sample_l, time]
 
                 im = ax.imshow(axField, cmap='binary', animated=True)
                 ims.append([im])
@@ -197,10 +190,7 @@ class ProblemData:
         Row 6 - Sources xcoord
         Row 7 - Sources ycoord
         Row 8 - Mesh connectivity
-        Row 9 - Solution field
-        
-        *Row 10 - Validation script only (Stiffness)
-        *Row 11 - Validation script only (Mass)
+        Row 9 - Solution field (NOT FULL)
         
         '''
         row_counter = 0
@@ -208,7 +198,7 @@ class ProblemData:
             reader = csv.reader(file)
             for row in reader:
                 if row_counter == 0:
-                    model.fill(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13])
+                    model.fill(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14])
                 if row_counter == 1:
                     for i in range(len(row)):
                         model.pulse[i] = float(row[i])
@@ -234,7 +224,7 @@ class ProblemData:
                     for i in range(4*model.ne):
                         model.raw_connectivity[i] = float(row[i])
                 if row_counter == 9:
-                    for i in range(model.nshots*model.nsteps*model.nn):
+                    for i in range(len(row)-1):
                         model.raw_solution[i] = float(row[i])
                         
                 else:
