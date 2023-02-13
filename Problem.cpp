@@ -438,6 +438,34 @@ double Problem::find_element_slowness(unsigned int element) {
     return element_mu;
 }
 
+
+/*   ===============  PML  ===============  */
+
+void Problem::pml_set(arma::mat thickness, double saturation) {
+    
+    //Set the PML saturation
+    pml_saturation = saturation;
+    pml_thickness = thickness;
+
+}
+
+void Problem::pml_build() {
+    //Info: Thickness {bottom, right, top, left} in Km
+    
+    //Find thickness in terms of elements:
+    //unsigned int neb = static_cast<unsigned int>(pml_thickness(0)/problem_mesh->get_element_depth());
+    //unsigned int net = static_cast<unsigned int>(pml_thickness(2)/problem_mesh->get_element_depth());
+    //unsigned int ner = static_cast<unsigned int>(pml_thickness(1)/problem_mesh->get_element_length());
+    //unsigned int nel = static_cast<unsigned int>(pml_thickness(3)/problem_mesh->get_element_length());
+    
+    //Populating the elements map (first bottom and top, second right and left)
+    
+}
+
+double Problem::pml_saturation_curve(unsigned int layer) {
+    return 0.1;
+}
+
 /*   ===============  Control methods  ===============  */
 
 void Problem::set_control(unsigned int n_levels, std::vector<double> levels, std::vector<double> velocities_arr) {

@@ -53,6 +53,8 @@ public:
     double get_domain_depth() const;
     unsigned int get_number_of_nodes() const;
     unsigned int get_number_of_elements() const;
+    double get_element_length() const;
+    double get_element_depth() const;
     
     //Loggers
     void log_coordinates() const;

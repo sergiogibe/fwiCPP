@@ -42,6 +42,10 @@ private:
     arma::Mat<unsigned int> receiver_nodes;
     arma::Mat<unsigned int> source_nodes;
     arma::cube* solution;
+    arma::mat pml_thickness;
+    unsigned int pml_max_nlayers;
+    double pml_saturation;
+    std::map<unsigned int, double> map_pml;
     
     
 /*    ===============    Public Methods    ===============    */    
@@ -62,6 +66,7 @@ public:
     //Solutions
     void solve(std::string mode);
     void build();
+    void pml_build();
     
     //Writers
     void print_levels();
@@ -76,7 +81,7 @@ public:
     //Setters
     void set_control(unsigned int n_levels, std::vector<double> levels, std::vector<double> velocities_arr);
     void add_device(std::string mode, double posx, double posy, unsigned int id);
-    
+    void pml_set(arma::mat thickness, double saturation);
     
 
 
@@ -96,6 +101,8 @@ private:
     void find_element_stiffness(arma::mat& element_stiff, arma::mat& element_coord);
     void find_element_mass(arma::mat& element_mass, arma::mat& element_coord);
     double find_element_slowness(unsigned int element); 
+    
+    double pml_saturation_curve(unsigned int layer);
 
 };
 

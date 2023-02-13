@@ -81,6 +81,14 @@ unsigned int SquareLinearMesh::get_number_of_nodes() const {
 unsigned int SquareLinearMesh::get_number_of_elements() const {
     return ne;
 }
+
+double SquareLinearMesh::get_element_length() const {
+    return element_length;
+}
+
+double SquareLinearMesh::get_element_depth() const {
+    return element_depth;
+}
     
 void SquareLinearMesh::log_coordinates() const {
     if (nn < 100) {
